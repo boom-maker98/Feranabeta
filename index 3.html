@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ferana Sandbox</title>
+<meta name="description" content="A prototype sandbox for testing stress-resilience routines for women who wear wearables.">
+<meta name="theme-color" content="#4A5853">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600&amp;family=DM+Mono:wght@300;400;500&amp;family=Hanken+Grotesk:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#4A5853; --ink:#F3F5F1; --muted:#DCE2DD; --sand:#E6D3B3; --btn-ink:#26302D;
+  --line:rgba(255,255,255,.28); --glass:rgba(255,255,255,.07); --glass-line:rgba(255,255,255,.22);
+  --display:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;
+  --mono:'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --body:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:560px;margin:0 auto;padding:20px 24px 96px}
+a{color:var(--sand)}
+button,input,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--sand);outline-offset:3px}
+
+.top{display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.brand{font-size:13px;letter-spacing:.08em;color:var(--muted)}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;padding:6px 12px;border:1px solid rgba(255,255,255,.4);border-radius:14px}
+.glass{background:var(--glass);border:1px solid var(--glass-line);border-radius:28px;padding:24px;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.notice{margin-top:16px;border-radius:20px;padding:16px 18px;font-size:13px;line-height:1.6}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:0}
+h1,h2,h3,.display{font-family:var(--display);font-weight:300;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(36px,11vw,46px);line-height:1.04}
+h2{font-size:clamp(32px,9.5vw,40px);line-height:1.08}
+h3{font-size:30px;line-height:1.1}
+.lede{margin:0;font-size:15px;line-height:1.65;color:var(--muted)}
+.intro{margin-top:44px;display:flex;flex-direction:column;gap:14px}
+
+form .group-title{margin-top:44px;margin-bottom:14px}
+.field{border-top:1px solid var(--line);padding:20px 0 22px}
+.flabel{display:block;font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:24px;line-height:1.2}
+.opt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);margin-left:8px;vertical-align:middle}
+.help{margin:8px 0 0;font-size:13px;line-height:1.55;color:var(--muted)}
+.entry{display:flex;align-items:baseline;gap:10px;margin-top:10px}
+input.big{width:5.2ch;min-width:96px;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.45);border-radius:0;color:var(--ink);font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:44px;line-height:1.1;padding:0 0 4px}
+input.big::-webkit-outer-spin-button,input.big::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input.big{-moz-appearance:textfield;appearance:textfield}
+.unit{font-size:14px;color:var(--muted)}
+.range{width:100%;accent-color:var(--sand);margin:8px 0 0;height:32px}
+input.txt{width:100%;min-height:48px;background:rgba(0,0,0,.18);border:1px solid var(--glass-line);border-radius:16px;padding:12px 14px;color:var(--ink);font-size:16px;margin-top:10px}
+input::placeholder,textarea::placeholder{color:rgba(243,245,241,.62)}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border:0;border-radius:26px;background:var(--ink);color:var(--btn-ink);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn[disabled]{opacity:.6;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.4)}
+.form-error{min-height:22px;margin:14px 0 0;font-size:13px;color:var(--sand)}
+
+#results{margin-top:56px;scroll-margin-top:16px}
+#results:focus{outline:none}
+.greet{margin-bottom:28px}
+.bignum{font-family:var(--display);font-weight:300;letter-spacing:-.04em;font-size:104px;line-height:1;margin-top:6px}
+.bignum small{font-size:34px;color:var(--muted);letter-spacing:-.02em}
+.meter{position:relative;height:12px;margin-top:20px}
+.meter::before{content:"";position:absolute;top:5px;left:0;right:0;height:1px;background:rgba(255,255,255,.4)}
+.meter i{position:absolute;top:4px;left:0;height:3px;border-radius:2px;background:var(--sand)}
+.meter b{position:absolute;top:0;width:12px;height:12px;margin-left:-6px;border-radius:6px;background:var(--sand);box-shadow:0 0 0 2px var(--bg)}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:30px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.trio>div{padding:16px 0 16px 14px;border-left:1px solid var(--line);min-width:0}
+.trio>div:first-child{padding-left:0;border-left:0}
+.trio .k{font-size:12px;color:var(--muted);margin:0}
+.trio .l{min-width:0}
+.trio .v{font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:25px;line-height:1.15;margin:4px 0 0}
+.trio .s{font-size:12px;line-height:1.4;color:var(--muted);margin:2px 0 0}
+.safety{margin-top:28px}
+.safety p{margin:10px 0 0;font-size:14px;line-height:1.65}
+.safety .eyebrow{color:var(--sand)}
+.cue{margin:32px 0 0;font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:25px;line-height:1.3}
+.focus{margin:12px 0 0;font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{font-family:var(--mono);font-size:12px;padding:5px 11px;border:1px solid var(--line);border-radius:14px}
+
+.chapter{margin-top:52px}
+.chapter .why{margin:14px 0 0;font-size:15px;line-height:1.7}
+.chapter .why span{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--sand);text-transform:uppercase;margin-bottom:4px}
+.ceiling{margin-top:18px;padding:14px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:14px}
+.ceiling span{color:var(--muted)}
+.ceiling strong{font-weight:500;text-align:right}
+.moves{list-style:none;margin:18px 0 0;padding:0;border-bottom:1px solid var(--line)}
+.moves>li{border-top:1px solid var(--line)}
+.mt{display:grid;grid-template-columns:auto 1fr auto;gap:0 14px;align-items:center;width:100%;min-height:68px;padding:10px 0;background:none;border:0;color:inherit;text-align:left;cursor:pointer}
+.mn{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.mname{display:block;font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:23px;line-height:1.15}
+.mmin{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.mcta{font-size:13px;color:var(--sand);white-space:nowrap}
+.mb{padding:0 0 24px 38px;display:flex;flex-direction:column;gap:18px}
+.mb .what{margin:0;font-size:14px;line-height:1.65;color:var(--muted)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:22px 1fr;gap:12px;align-items:baseline;font-size:15px;line-height:1.6;counter-increment:s}
+.steps li::before{content:counter(s);font-family:var(--display);font-weight:300;font-size:22px;color:var(--sand)}
+.kv{display:flex;justify-content:space-between;gap:12px;align-items:baseline;border-top:1px solid rgba(255,255,255,.2);padding-top:14px;font-size:14px}
+.kv span{color:var(--muted);font-size:13px}
+.lbl{font-size:12px;color:var(--muted);margin:0 0 4px}
+.txtp{margin:0;font-size:14px;line-height:1.55}
+
+.section{margin-top:56px}
+.notes{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.6}
+.why-line{margin:20px 0 0;font-size:13px;line-height:1.65;color:var(--muted)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.whatif .val{font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:30px;line-height:1}
+.whatif .res{margin-top:16px;display:flex;gap:40px;flex-wrap:wrap}
+.whatif .res .n{font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:44px;line-height:1.1}
+.whatif .res .n small{font-size:16px;color:var(--muted)}
+.check{display:flex;align-items:center;gap:12px;min-height:44px;font-size:15px;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--sand);margin:0;flex:none}
+.wk{display:grid;grid-template-columns:74px repeat(3,minmax(0,1fr));gap:8px;align-items:center;margin-top:8px}
+.wk .h{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.wk .d{font-size:13px;color:var(--muted)}
+.cell{width:100%;min-height:44px;background:rgba(0,0,0,.18);border:1px solid var(--glass-line);border-radius:12px;padding:8px 8px;color:var(--ink);font-size:15px}
+.chart{margin-top:22px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.readout{min-height:24px;margin:8px 0 0;font-size:13px;color:var(--muted)}
+.metric{margin-top:18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid var(--line);padding-top:14px}
+.metric .n{font-family:var(--display);font-weight:300;letter-spacing:-.02em;font-size:30px;white-space:nowrap}
+.metric .k{font-size:13px;color:var(--muted)}
+
+.fb{display:flex;flex-direction:column;gap:16px}
+.fb h2{font-size:30px;line-height:1.15}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{flex:1 1 90px;min-height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.4);background:transparent;color:var(--ink);font-size:13px;font-weight:500;cursor:pointer;padding:0 12px}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--btn-ink);border-color:var(--ink)}
+textarea.msg{width:100%;min-height:104px;resize:vertical;background:rgba(0,0,0,.18);border:1px solid var(--glass-line);border-radius:16px;padding:14px;color:var(--ink);font-size:16px;line-height:1.5}
+.fb label.l{font-size:13px;color:var(--muted)}
+.fb input.txt{margin-top:0}
+.status{min-height:22px;margin:0;font-size:14px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.foot{margin-top:40px;font-size:13px;line-height:1.6;color:var(--muted)}
+@media (max-width:480px){
+  .trio{grid-template-columns:1fr}
+  .trio>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0;border-left:0;border-top:1px solid var(--line)}
+  .trio>div:first-child{border-top:0}
+  .trio .v{text-align:right;margin:0}
+}
+@media (max-width:380px){
+  .bignum{font-size:88px}
+  .glass{padding:20px 16px}
+  .wk{grid-template-columns:52px repeat(3,minmax(0,1fr));gap:6px}
+  .cell{padding:8px 4px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">Ferana Sandbox</div>
+    <div class="tag">PROTOTYPE</div>
+  </header>
+
+  <div class="glass notice" role="note">This is a prototype sandbox, an early test of the 3-Matrix Logic Engine. It does not connect to wearables, so read your numbers off your watch, ring or band and enter them here. Your numbers stay on this page. Tell us what works and what does not at the bottom.</div>
+
+  <main>
+    <section class="intro">
+      <p class="eyebrow">Stress resilience for women who wear wearables</p>
+      <h1>Tell us your numbers.</h1>
+      <p class="lede">It takes about a minute. Use this morning's readings from your wearable.</p>
+    </section>
+
+    <form id="inputs" novalidate autocomplete="off">
+      <p class="eyebrow group-title">Step 1 &middot; Waking biometrics</p>
+
+      <div class="field">
+        <label class="flabel" for="hrv">Heart rate variability</label>
+        <p class="help" id="hrv-h">Your morning waking HRV score.</p>
+        <div class="entry"><input class="big" id="hrv" type="number" inputmode="numeric" min="10" max="200" step="1" value="65" aria-describedby="hrv-h"><span class="unit">score</span></div>
+        <input class="range" id="hrv-r" type="range" min="10" max="200" step="1" value="65" aria-label="Heart rate variability, slider">
+      </div>
+
+      <div class="field">
+        <label class="flabel" for="rhr">Resting heart rate drift</label>
+        <p class="help" id="rhr-h">How many beats per minute higher (+) or lower (-) your waking resting heart rate is compared with your 30-day baseline.</p>
+        <div class="entry"><input class="big" id="rhr" type="number" inputmode="numeric" min="-10" max="15" step="1" value="0" aria-describedby="rhr-h"><span class="unit">bpm vs baseline</span></div>
+        <input class="range" id="rhr-r" type="range" min="-10" max="15" step="1" value="0" aria-label="Resting heart rate drift, slider">
+      </div>
+
+      <div class="field">
+        <label class="flabel" for="sleep">Sleep debt</label>
+        <p class="help" id="sleep-h">How many hours of sleep you are short of your ideal night.</p>
+        <div class="entry"><input class="big" id="sleep" type="number" inputmode="decimal" min="0" max="6" step="0.5" value="0" aria-describedby="sleep-h"><span class="unit">hours short</span></div>
+        <input class="range" id="sleep-r" type="range" min="0" max="6" step="0.5" value="0" aria-label="Sleep debt, slider">
+      </div>
+
+      <p class="eyebrow group-title">Optional</p>
+
+      <div class="field">
+        <label class="flabel" for="name">First name<span class="opt">OPTIONAL</span></label>
+        <input class="txt" id="name" type="text" maxlength="40" autocomplete="off" placeholder="So we can greet you">
+      </div>
+
+      <div class="field">
+        <label class="flabel" for="maxhr">Max heart rate<span class="opt">OPTIONAL</span></label>
+        <p class="help" id="maxhr-h">Add it to see your heart rate ceiling as a number of beats per minute.</p>
+        <div class="entry"><input class="big" id="maxhr" type="number" inputmode="numeric" min="120" max="230" step="1" placeholder="--" aria-describedby="maxhr-h"><span class="unit">bpm</span></div>
+      </div>
+
+      <button class="btn" type="submit" id="run">See my read</button>
+      <p class="form-error" id="form-error" role="alert"></p>
+    </form>
+
+    <section id="results" tabindex="-1" aria-live="polite" hidden></section>
+
+    <section class="section" id="feedback" aria-labelledby="fb-title">
+      <form class="glass fb" id="fb-form" novalidate>
+        <p class="eyebrow">Prototype feedback</p>
+        <h2 id="fb-title">Does today's plan match how you feel?</h2>
+        <div class="pills" role="group" aria-label="How well did the routine match how you feel">
+          <button type="button" class="pill" data-rating="Matches" aria-pressed="false">Matches</button>
+          <button type="button" class="pill" data-rating="Slightly off" aria-pressed="false">Slightly off</button>
+          <button type="button" class="pill" data-rating="Not right" aria-pressed="false">Not right</button>
+        </div>
+        <label class="l" for="fb-msg">What feels boring, confusing or missing? Was any movement unclear?</label>
+        <textarea class="msg" id="fb-msg" maxlength="2000" placeholder="Anything helps."></textarea>
+        <label class="l" for="fb-email">Email, if you would like a reply <span class="opt">OPTIONAL</span></label>
+        <input class="txt" id="fb-email" type="email" autocomplete="email" placeholder="you@example.com">
+        <label class="check" for="fb-include"><input type="checkbox" id="fb-include" disabled><span>Include my numbers and today's routine with this feedback</span></label>
+        <div class="hp" aria-hidden="true"><label>Leave this empty<input type="text" id="fb-gotcha" tabindex="-1" autocomplete="off"></label></div>
+        <button class="btn" type="submit" id="fb-send">Send feedback</button>
+        <p class="status" id="fb-status" role="status" aria-live="polite"></p>
+      </form>
+      <p class="foot">Ferana is in private beta. This sandbox is a prototype and will keep changing as you tell us what works. Your numbers never leave this page unless you tick the box above.</p>
+    </section>
+  </main>
+</div>
+
+<script src="engine.js"></script>
+<script src="movements.js"></script>
+<script>
+(function () {
+  "use strict";
+  var FORM_URL = "https://formspree.io/f/mwlvadvd";
+  var E = window.FeranaEngine, M = window.FeranaMoves;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var S = { inp: null, out: null, maxHr: null, week: [], open: {}, rating: "" };
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+  function sign(n) { return n > 0 ? "+" + n : String(n); }
+  function cap(s) { return s.charAt(0) + s.slice(1).toLowerCase(); }
+  function pad(n) { return n < 10 ? "0" + n : String(n); }
+
+  /* ---------- inputs: number box and slider stay in sync ---------- */
+  [["hrv", 10, 200], ["rhr", -10, 15], ["sleep", 0, 6]].forEach(function (p) {
+    var num = $("#" + p[0]), rng = $("#" + p[0] + "-r");
+    num.addEventListener("input", function () {
+      var v = parseFloat(num.value);
+      if (isFinite(v)) rng.value = clamp(v, p[1], p[2]);
+    });
+    num.addEventListener("change", function () {
+      var v = parseFloat(num.value);
+      if (!isFinite(v)) { v = parseFloat(rng.value); }
+      v = clamp(v, p[1], p[2]);
+      num.value = v; rng.value = v;
+    });
+    rng.addEventListener("input", function () { num.value = rng.value; });
+  });
+
+  function readInputs() {
+    function get(id, lo, hi, step) {
+      var v = parseFloat($("#" + id).value);
+      if (!isFinite(v)) v = parseFloat($("#" + id + "-r").value);
+      v = clamp(Math.round(v / step) * step, lo, hi);
+      $("#" + id).value = v; $("#" + id + "-r").value = v;
+      return v;
+    }
+    var mh = parseFloat($("#maxhr").value);
+    return {
+      inp: { hrv: get("hrv", 10, 200, 1), rhrDrift: get("rhr", -10, 15, 1), sleepDebt: get("sleep", 0, 6, 0.5) },
+      name: $("#name").value.trim(),
+      maxHr: isFinite(mh) && mh >= 120 && mh <= 230 ? Math.round(mh) : null
+    };
+  }
+
+  /* ---------- run ---------- */
+  $("#inputs").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var r = readInputs();
+    var mhRaw = $("#maxhr").value;
+    $("#form-error").textContent = (mhRaw && !r.maxHr) ? "Max heart rate should be between 120 and 230. It was left out." : "";
+    S.inp = r.inp; S.name = r.name; S.maxHr = r.maxHr;
+    S.out = E.run(r.inp);
+    S.week = [0, 1, 2, 3, 4, 5, 6].map(function () { return { hrv: String(r.inp.hrv), rhr: String(r.inp.rhrDrift), sleep: String(r.inp.sleepDebt) }; });
+    S.trendOn = false;
+    S.open = { "1-0": true };
+    render();
+    $("#fb-include").disabled = false;
+    var res = $("#results");
+    res.hidden = false;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    res.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    res.focus({ preventScroll: true });
+  });
+
+  /* ---------- copy that explains why each chapter was chosen ---------- */
+  function ceilingText() {
+    var c = S.out.ceiling, m = c.match(/(\d+)%/);
+    if (!S.maxHr || !m) return c;
+    var bpm = Math.round(S.maxHr * parseInt(m[1], 10) / 100);
+    return c + " (" + (c.indexOf("under") === 0 ? "under " : "up to ") + bpm + " bpm)";
+  }
+  function whyFor(i) {
+    var o = S.out, t = o.tier, inp = S.inp, txt = "";
+    if (i === 0) {
+      txt = {
+        PRIMED: "Your readings are strong, so the day opens with a short reset that wakes your breathing and loosens your spine and hips before you build.",
+        BALANCED: "Your readings are steady, so the day opens with breath and gentle spine and hip movement to settle in before the work.",
+        STRAINED: "Some strain is showing in your numbers, so the day opens with slower breathing and supported positions.",
+        OVERLOADED: "Your numbers say recovery comes first, so the day opens slowly with supported positions and a long out-breath."
+      }[t];
+      if (inp.rhrDrift >= 5) txt += " Your resting heart rate is up " + inp.rhrDrift + " bpm, so the breathing runs longer on the exhale.";
+    } else if (i === 1) {
+      var lead = "Resilience is " + o.resilience + "/100, so ";
+      txt = lead + {
+        PRIMED: "this chapter turns up the intensity.",
+        BALANCED: "this chapter holds a steady metabolic pace.",
+        STRAINED: "this chapter slows the tempo and cuts the impact.",
+        OVERLOADED: "this chapter is short, supported and low effort."
+      }[t] + " Effort stays " + o.ceiling + ".";
+    } else {
+      txt = (t === "PRIMED" || t === "BALANCED")
+        ? "The evening chapter releases the day's load and slows your breathing so your body can downshift before sleep."
+        : "The evening chapter is built to bring your nervous system down so tonight's sleep recovers more.";
+      if (inp.sleepDebt >= 2) txt += " You are " + inp.sleepDebt + " h short on sleep, so legs-up-the-wall is added.";
+    }
+    return txt;
+  }
+
+  /* ---------- render results ---------- */
+  function chapterHtml(i, title, theme, moves) {
+    var mins = moves.reduce(function (a, m) { return a + m[1]; }, 0);
+    var lis = moves.map(function (m, j) {
+      var g = M.get(m[0]), id = "mv-" + i + "-" + j, key = i + "-" + j, open = !!S.open[key];
+      var steps = g.steps.map(function (s) { return "<li><span>" + esc(s) + "</span></li>"; }).join("");
+      return '<li>' +
+        '<button type="button" class="mt" data-key="' + key + '" aria-expanded="' + open + '" aria-controls="' + id + '">' +
+          '<span class="mn">' + pad(j + 1) + '</span>' +
+          '<span><span class="mname">' + esc(m[0]) + '</span><span class="mmin">' + m[1] + ' min</span></span>' +
+          '<span class="mcta">' + (open ? "Hide" : "Show how") + '</span>' +
+        '</button>' +
+        '<div class="mb" id="' + id + '"' + (open ? "" : " hidden") + '>' +
+          '<p class="what">' + esc(g.what) + '</p>' +
+          '<ol class="steps">' + steps + '</ol>' +
+          '<div class="kv"><span>Time</span><strong style="font-weight:500">' + m[1] + ' min</strong></div>' +
+          '<div><p class="lbl">Easier version</p><p class="txtp">' + esc(g.easier) + '</p></div>' +
+          '<div><p class="lbl">Stop if you feel</p><p class="txtp">' + esc(g.stop) + '</p></div>' +
+        '</div></li>';
+    }).join("");
+    var ceil = i === 1
+      ? '<div class="ceiling"><span>Heart rate ceiling</span><strong>' + esc(ceilingText()) + '</strong></div>' +
+        (S.maxHr ? "" : '<p class="help" style="margin-top:0">Add your max heart rate above and run again to see this as beats per minute.</p>')
+      : "";
+    return '<article class="chapter">' +
+      '<p class="eyebrow">Chapter ' + (i + 1) + ' &middot; ' + mins + ' min &middot; ' + esc(theme) + '</p>' +
+      '<h3 style="margin-top:8px">' + esc(title) + '</h3>' +
+      '<p class="why"><span>Why this chapter</span>' + esc(whyFor(i)) + '</p>' +
+      ceil +
+      '<ol class="moves">' + lis + '</ol></article>';
+  }
+
+  function render() {
+    var o = S.out, inp = S.inp;
+    var greet = S.name ? "Morning, " + esc(S.name) + "." : "Good morning.";
+    var safety = o.safetyWarnings.length
+      ? '<div class="glass safety"><p class="eyebrow">' + (o.matrix1 === "CRITICAL WARNING" ? "Read this first" : "Worth knowing") + '</p>' +
+        o.safetyWarnings.map(function (w) { return "<p>" + esc(w) + "</p>"; }).join("") + "</div>"
+      : '<div class="glass safety"><p class="eyebrow">Matrix 1 &middot; Safety</p><p>All safety checks passed.</p></div>';
+    var notes = o.adjustNotes.length
+      ? '<section class="section"><p class="eyebrow">Personalized for you today</p><ul class="notes">' +
+        o.adjustNotes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul></section>" : "";
+
+    $("#results").innerHTML =
+      '<h2 class="display greet">' + greet + '</h2>' +
+      '<div><p class="eyebrow">Matrix 2 &middot; Resilience</p>' +
+      '<div class="bignum">' + o.resilience + '<small> / 100</small></div>' +
+      '<div class="meter" role="img" aria-label="Resilience ' + o.resilience + ' out of 100"><i style="width:' + o.resilience + '%"></i><b style="left:' + o.resilience + '%"></b></div>' +
+      '<div class="trio">' +
+        '<div><div class="l"><p class="k">Matrix 1 &middot; Safety</p>' + (o.matrix1 === "CRITICAL WARNING" ? '<p class="s">see the note below</p>' : "") + '</div><p class="v">' + (o.matrix1 === "CRITICAL WARNING" ? "Critical" : cap(o.matrix1)) + '</p></div>' +
+        '<div><div class="l"><p class="k">Body stress index</p><p class="s">lower is calmer</p></div><p class="v">' + o.stressIndex + '</p></div>' +
+        '<div><div class="l"><p class="k">Matrix 3 &middot; Routine</p></div><p class="v">' + cap(o.tier) + '</p></div>' +
+      '</div></div>' +
+      safety +
+      '<p class="cue">' + esc(o.cue) + '</p>' +
+      '<p class="focus">' + esc(o.focus) + '</p>' +
+      '<div class="chips"><span class="chip">HRV ' + inp.hrv + '</span><span class="chip">RHR ' + sign(inp.rhrDrift) + ' bpm</span><span class="chip">Sleep debt ' + inp.sleepDebt + ' h</span></div>' +
+      '<section class="section" style="margin-top:44px"><p class="eyebrow">Today\'s movement</p></section>' +
+      chapterHtml(0, "Morning Awakening", "Restorative", o.ch1) +
+      chapterHtml(1, "Peak Energy", "Metabolic flow", o.ch2) +
+      chapterHtml(2, "Evening Wind Down", "Nervous system release", o.ch3) +
+      notes +
+      '<p class="why-line">Why this routine: HRV ' + inp.hrv + ', RHR drift ' + inp.rhrDrift + ' bpm and sleep debt ' + inp.sleepDebt + ' h give a resilience score of ' + o.resilience + ' (' + cap(o.tier) + ').</p>' +
+      whatIfHtml() + trendShellHtml();
+    renderTrendOut();
+    renderWeekTable();
+    updateWhatIf();
+  }
+
+  /* ---------- what if: same engine, different sleep debt ---------- */
+  function whatIfHtml() {
+    return '<section class="section"><div class="glass whatif">' +
+      '<p class="eyebrow">What if</p>' +
+      '<div class="row" style="margin-top:12px"><label for="wi" style="font-size:14px;color:var(--muted)">Sleep debt were</label><div class="val" id="wi-val">' + S.inp.sleepDebt + ' h</div></div>' +
+      '<input class="range" id="wi" type="range" min="0" max="6" step="0.5" value="' + S.inp.sleepDebt + '" style="margin-top:12px">' +
+      '<div class="res"><div><p class="lbl" style="margin:0">Resilience</p><div class="n" id="wi-r"></div></div><div><p class="lbl" style="margin:0">Routine</p><div class="n" id="wi-t"></div></div></div>' +
+      '<p class="help" id="wi-note"></p>' +
+      '</div></section>';
+  }
+  function updateWhatIf() {
+    var sd = parseFloat($("#wi").value);
+    var r = E.run({ hrv: S.inp.hrv, rhrDrift: S.inp.rhrDrift, sleepDebt: sd });
+    $("#wi-val").textContent = sd + " h";
+    $("#wi-r").innerHTML = r.resilience + "<small> / 100</small>";
+    $("#wi-t").textContent = cap(r.tier);
+    var d = r.resilience - S.out.resilience;
+    $("#wi-note").textContent = d === 0 ? "Same as your read above. Move the slider to see how sleep changes your score."
+      : (d > 0 ? "That would lift your score by " + d + " points." : "That would lower your score by " + (-d) + " points.") + " Your read above does not change.";
+  }
+
+  /* ---------- trend ---------- */
+  var DAYS = ["6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "Yesterday", "Today"];
+  var SHORT = ["6d", "5d", "4d", "3d", "2d", "1d", "Today"];
+  var TABLE_DAYS = ["6d ago", "5d ago", "4d ago", "3d ago", "2d ago", "1d ago", "Today"];
+
+  function trendShellHtml() {
+    return '<section class="section"><div class="glass">' +
+      '<p class="eyebrow">Step 3 &middot; Track your resilience</p>' +
+      '<label class="check" for="tr-on" style="margin-top:8px"><input type="checkbox" id="tr-on"' + (S.trendOn ? " checked" : "") + '><span>Add my last 7 days to see my resilience trend</span></label>' +
+      '<div id="tr-body" ' + (S.trendOn ? "" : "hidden") + '>' +
+        '<p class="help">Edit each day to match your wearable. Your numbers stay on this page.</p>' +
+        '<div id="tr-table"></div><div id="tr-out"></div>' +
+      '</div></div></section>';
+  }
+  function renderWeekTable() {
+    var h = '<div class="wk"><span class="h">DAY</span><span class="h">HRV</span><span class="h">RHR DRIFT</span><span class="h">SLEEP DEBT</span></div>';
+    S.week.forEach(function (r, i) {
+      h += '<div class="wk"><span class="d">' + DAYS[i] + '</span>' +
+        '<input class="cell" type="number" inputmode="decimal" data-r="' + i + '" data-c="hrv" value="' + esc(r.hrv) + '" aria-label="' + DAYS[i] + ', HRV">' +
+        '<input class="cell" type="number" inputmode="decimal" data-r="' + i + '" data-c="rhr" value="' + esc(r.rhr) + '" aria-label="' + DAYS[i] + ', RHR drift">' +
+        '<input class="cell" type="number" inputmode="decimal" step="0.5" data-r="' + i + '" data-c="sleep" value="' + esc(r.sleep) + '" aria-label="' + DAYS[i] + ', sleep debt in hours"></div>';
+    });
+    $("#tr-table").innerHTML = h;
+  }
+  function chartSvg(scores) {
+    var W = 480, H = 220, L = 34, R = 18, T = 16, B = 30, pw = W - L - R, ph = H - T - B;
+    var X = function (i) { return L + i * pw / 6; }, Y = function (v) { return T + (1 - v / 100) * ph; };
+    var g = "", d = "", started = false, pts = "";
+    [0, 50, 100].forEach(function (v) {
+      g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="rgba(255,255,255,.22)" stroke-width="1"/>' +
+        '<text x="' + (L - 8) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="11" fill="#DCE2DD">' + v + '</text>';
+    });
+    SHORT.forEach(function (s, i) {
+      g += '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#DCE2DD">' + s + '</text>';
+    });
+    scores.forEach(function (v, i) {
+      if (isNaN(v)) { started = false; return; }
+      d += (started ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1) + " ";
+      started = true;
+      pts += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="4" fill="#E6D3B3" stroke="#4A5853" stroke-width="2"/>' +
+        '<circle class="hit" tabindex="0" data-i="' + i + '" cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="16" fill="transparent" role="img" aria-label="' + DAYS[i] + ', resilience ' + v + '"/>';
+    });
+    var last = scores[6];
+    var lab = isNaN(last) ? "" : '<text x="' + X(6) + '" y="' + (Y(last) - 12) + '" text-anchor="end" font-size="13" font-weight="500" fill="#F3F5F1">' + last + '</text>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="group" aria-label="Resilience score over the last 7 days, from 0 to 100">' + g +
+      '<path d="' + d + '" fill="none" stroke="#E6D3B3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' + pts + lab + '</svg>';
+  }
+  function renderTrendOut() {
+    var rows = S.week.map(function (r) { return { hrv: parseFloat(r.hrv), rhr: parseFloat(r.rhr), sleep: parseFloat(r.sleep) }; });
+    var t = E.trend(rows);
+    S.scores = t.scores;
+    var out = $("#tr-out"); if (!out) return;
+    out.innerHTML = '<div class="chart">' + chartSvg(t.scores) + '</div>' +
+      '<p class="readout" id="readout">Hover or tab to a point to read it.</p>' +
+      '<div class="metric"><span class="k">Trend: first 3 days vs last 3 days</span><span class="n">' + esc(t.text) + '</span></div>' +
+      '<p class="help">' + esc(t.message) + ' Prototype score.</p>';
+  }
+  function showPoint(el) {
+    var i = parseInt(el.getAttribute("data-i"), 10);
+    $("#readout").textContent = DAYS[i] + ": resilience " + S.scores[i] + " out of 100.";
+  }
+
+  /* ---------- delegated events inside results ---------- */
+  $("#results").addEventListener("click", function (ev) {
+    var b = ev.target.closest(".mt");
+    if (!b) return;
+    var key = b.getAttribute("data-key"), open = b.getAttribute("aria-expanded") !== "true";
+    S.open[key] = open;
+    b.setAttribute("aria-expanded", open);
+    $(".mcta", b).textContent = open ? "Hide" : "Show how";
+    document.getElementById(b.getAttribute("aria-controls")).hidden = !open;
+  });
+  $("#results").addEventListener("input", function (ev) {
+    var t = ev.target;
+    if (t.id === "wi") updateWhatIf();
+    else if (t.classList.contains("cell")) {
+      S.week[parseInt(t.getAttribute("data-r"), 10)][t.getAttribute("data-c")] = t.value;
+      renderTrendOut();
+    }
+  });
+  $("#results").addEventListener("change", function (ev) {
+    if (ev.target.id === "tr-on") {
+      S.trendOn = ev.target.checked;
+      $("#tr-body").hidden = !S.trendOn;
+    }
+  });
+  $("#results").addEventListener("mouseover", function (ev) { if (ev.target.classList && ev.target.classList.contains("hit")) showPoint(ev.target); });
+  $("#results").addEventListener("focusin", function (ev) { if (ev.target.classList && ev.target.classList.contains("hit")) showPoint(ev.target); });
+
+  /* ---------- feedback to Formspree ---------- */
+  document.querySelectorAll(".pill").forEach(function (p) {
+    p.addEventListener("click", function () {
+      var on = p.getAttribute("aria-pressed") === "true";
+      document.querySelectorAll(".pill").forEach(function (q) { q.setAttribute("aria-pressed", "false"); });
+      S.rating = on ? "" : p.getAttribute("data-rating");
+      p.setAttribute("aria-pressed", on ? "false" : "true");
+    });
+  });
+  $("#fb-form").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var status = $("#fb-status"), btn = $("#fb-send");
+    var msg = $("#fb-msg").value.trim(), email = $("#fb-email").value.trim();
+    if (!S.rating && !msg) { status.textContent = "Pick a rating or write a note first."; return; }
+    var payload = {
+      _subject: "Ferana prototype feedback",
+      source: "Ferana Sandbox prototype",
+      rating: S.rating || "(no rating)",
+      message: msg,
+      _gotcha: $("#fb-gotcha").value
+    };
+    if (email) payload.email = email;
+    if ($("#fb-include").checked && S.out) {
+      payload.first_name = S.name || "";
+      payload.hrv = S.inp.hrv; payload.rhr_drift_bpm = S.inp.rhrDrift; payload.sleep_debt_hours = S.inp.sleepDebt;
+      payload.resilience = S.out.resilience; payload.body_stress_index = S.out.stressIndex;
+      payload.routine_tier = S.out.tier; payload.safety_status = S.out.matrix1;
+    }
+    btn.disabled = true; status.textContent = "Sending...";
+    fetch(FORM_URL, { method: "POST", headers: { "Accept": "application/json", "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .then(function (r) { if (!r.ok) throw new Error("bad status"); return r; })
+      .then(function () {
+        status.textContent = "Thank you. Your feedback reached us.";
+        $("#fb-msg").value = ""; $("#fb-email").value = ""; S.rating = "";
+        document.querySelectorAll(".pill").forEach(function (q) { q.setAttribute("aria-pressed", "false"); });
+        btn.disabled = false;
+      })
+      .catch(function () {
+        status.textContent = "That did not go through. Please try again, or email FeranaOfficial@proton.me.";
+        btn.disabled = false;
+      });
+  });
+})();
+</script>
+</body>
+</html>
